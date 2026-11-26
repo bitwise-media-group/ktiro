@@ -223,6 +223,8 @@ export interface QuestionOption {
   description: string;
   recommended?: boolean;
   preview?: string;
+  /** The preview's language, for syntax highlighting (sql, yaml, markdown, …). */
+  previewLang?: string;
 }
 
 export interface Question {

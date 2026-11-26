@@ -7,6 +7,8 @@
 // paragraphs, "- " lists, fenced code, **bold**, *italic*, `code`. The input
 // is always authored in src/data or typed into the demo, and is escaped first.
 
+import { highlightHtml } from "../highlight";
+
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 function inline(s: string): string {
@@ -21,7 +23,9 @@ export function renderMarkdown(src: string): string {
   const blocks = src.split(/\n{2,}/);
   for (const block of blocks) {
     if (block.startsWith("```")) {
-      out.push(`<pre><code>${esc(block.replace(/^```\w*\n?/, "").replace(/```$/, ""))}</code></pre>`);
+      const lang = block.match(/^```(\w+)/)?.[1];
+      const code = block.replace(/^```\w*\n?/, "").replace(/\n?```$/, "");
+      out.push(`<pre class="hljs"><code>${highlightHtml(code, lang)}</code></pre>`);
     } else if (/^\s*[-*] /.test(block)) {
       const items = block.split(/\n(?=\s*[-*] )/).map((l) => `<li>${inline(l.replace(/^\s*[-*] /, ""))}</li>`);
       out.push(`<ul>${items.join("")}</ul>`);

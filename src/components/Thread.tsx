@@ -20,6 +20,7 @@ import { EvidenceStrip } from "./Evidence";
 import { Icon } from "./icons";
 import { Markdown } from "./Markdown";
 import { hrefIntent } from "../router";
+import { highlight } from "../highlight";
 
 const MATCH_LABEL: Record<Assignment["match"], string> = {
   author: "author",
@@ -119,8 +120,8 @@ export function QuestionCard({ intent, msg, card }: { intent: Intent; msg: Messa
             </div>
           </div>
           {hasPreview ? (
-            <pre class="m-0 min-h-[140px] overflow-auto rounded-lg border border-line bg-code p-3 font-mono text-[12px] leading-relaxed text-fg">
-              {q.options[sel]?.preview ?? "No preview for this option."}
+            <pre class="hljs m-0 min-h-[140px] overflow-auto rounded-lg border border-line bg-code p-3 font-mono text-[12px] leading-relaxed text-fg">
+              {q.options[sel]?.preview ? highlight(q.options[sel].preview!, q.options[sel].previewLang) : "No preview for this option."}
             </pre>
           ) : null}
         </div>

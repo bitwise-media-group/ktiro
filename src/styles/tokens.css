@@ -73,6 +73,22 @@
   --k-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.22);
   --k-shadow-strong: 0 2px 4px rgba(0, 0, 0, 0.3), 0 24px 60px rgba(0, 0, 0, 0.45);
   --k-glow: 0 0 0 1px rgba(88, 166, 240, 0.35);
+
+  /* Syntax highlighting (patchy's ramp, comments and variables on ktiro's
+   * slate), read against --k-code and --k-code-2. */
+  --hl-keyword: #c3a2f2;
+  --hl-string: #9fdcb0;
+  --hl-number: #f2a774;
+  --hl-comment: #8693a1;
+  --hl-title: #7fd1e0;
+  --hl-type: #e9cf86;
+  --hl-attr: #8fbff5;
+  --hl-meta: #f0a3c8;
+  --hl-variable: #e5ecf2;
+  --hl-add: #4cc9a0;
+  --hl-add-bg: rgba(76, 201, 160, 0.12);
+  --hl-del: #f27f75;
+  --hl-del-bg: rgba(242, 127, 117, 0.12);
 }
 
 /* Light: slate paper, white panels, deep azure. */
@@ -107,4 +123,18 @@
   --k-shadow: 0 1px 2px rgba(17, 26, 35, 0.06), 0 8px 24px rgba(17, 26, 35, 0.06);
   --k-shadow-strong: 0 2px 4px rgba(17, 26, 35, 0.08), 0 24px 60px rgba(17, 26, 35, 0.14);
   --k-glow: 0 0 0 1px rgba(29, 98, 176, 0.3);
+
+  --hl-keyword: #7334c2;
+  --hl-string: #1f6b3c;
+  --hl-number: #a44600;
+  --hl-comment: #556270;
+  --hl-title: #0a6577;
+  --hl-type: #845800;
+  --hl-attr: #1d4fb8;
+  --hl-meta: #9f1239;
+  --hl-variable: #111a23;
+  --hl-add: #0d7a5a;
+  --hl-add-bg: rgba(13, 122, 90, 0.12);
+  --hl-del: #b3261e;
+  --hl-del-bg: rgba(179, 38, 30, 0.1);
 }

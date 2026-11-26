@@ -18,6 +18,7 @@ import { Markdown } from "../components/Markdown";
 import { MiniRail } from "../components/PhaseRail";
 import { KindPill } from "../components/Pills";
 import { PHASE_LABEL, pct, usd } from "../format";
+import { highlight } from "../highlight";
 import { hrefIntent } from "../router";
 import { toast, useStore } from "../store";
 import type { Agent, AgentId, Intent } from "../types";
@@ -215,7 +216,7 @@ function AgentDetail({ a }: { a: Agent }) {
               <h2 class="k-heading !text-[14px]">Definition</h2>
               <span class="k-mono-tag ml-auto !text-[11px]">{a.definition}</span>
             </div>
-            <pre class="m-0 overflow-x-auto bg-code px-4 py-3 font-mono text-[12px] leading-relaxed text-fg">{definitionYaml(a)}</pre>
+            <pre class="hljs m-0 overflow-x-auto bg-code px-4 py-3 font-mono text-[12px] leading-relaxed text-fg">{highlight(definitionYaml(a), "yaml")}</pre>
             <p class="m-0 border-t border-line px-4 py-2.5 text-[12px] text-faint">Illustrative. Agents hold no credentials; model traffic goes through the egress broker.</p>
           </section>
         </div>

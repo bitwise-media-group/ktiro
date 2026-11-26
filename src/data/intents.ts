@@ -541,7 +541,7 @@ export const INTENTS: Intent[] = [
           trigger: "new-adr",
           context: "ktiro-docs/decisions/0014-psp-rate-limiting.md",
           options: [
-            { label: "Agree, product-wide", description: "Recorded in ktiro-docs. Review checks every future PSP adapter against it.", recommended: true, preview: "# ADR-0014: One rate limiter per payment provider\n\nStatus: proposed\n\n## Context\nEach PSP adapter retried on its own; two 429\nstorms in October delayed card payments.\n\n## Decision\nEvery outbound call to a payment provider goes\nthrough one token bucket per provider that\nhonours Retry-After. Adapters never retry on\ntheir own.\n\n## Consequences\n+ storms are bounded by construction\n- a new adapter must register its limits" },
+            { label: "Agree, product-wide", description: "Recorded in ktiro-docs. Review checks every future PSP adapter against it.", recommended: true, previewLang: "markdown", preview: "# ADR-0014: One rate limiter per payment provider\n\nStatus: proposed\n\n## Context\nEach PSP adapter retried on its own; two 429\nstorms in October delayed card payments.\n\n## Decision\nEvery outbound call to a payment provider goes\nthrough one token bucket per provider that\nhonours Retry-After. Adapters never retry on\ntheir own.\n\n## Consequences\n+ storms are bounded by construction\n- a new adapter must register its limits" },
             { label: "Agree, local to payments-gateway", description: "Recorded in the repository's own ADRs; other services may choose differently.", preview: "payments-gateway/docs/adr/0003-psp-rate-limiting.md" },
             { label: "Don't record an ADR", description: "Keep the code; no principle. Future adapters may drift back to retrying on their own." },
           ],
@@ -613,9 +613,9 @@ export const INTENTS: Intent[] = [
           confidence: 0.62,
           context: "payments-gateway · internal/intake/dedupe.go",
           options: [
-            { label: "Both: event ID, then flag lookalikes", description: "Unique on (provider, event_id); a payload-hash match on a new ID is held for review instead of posted. Catches all 41 without silently merging genuine twins.", recommended: true, preview: "-- unique, enforced\nCREATE UNIQUE INDEX CONCURRENTLY deliveries_event_uq\n  ON deliveries (provider, event_id);\n\n-- lookalike: held, not dropped\nIF hash_seen(payload_sha256, 72h) THEN\n  hold_for_review(delivery)\nEND IF;" },
-            { label: "Provider event ID only", description: "Exact and simple. Stripe and Adyen guarantee unique IDs; misses the 3 incident re-issues, which would still need manual reversal.", preview: "CREATE UNIQUE INDEX CONCURRENTLY deliveries_event_uq\n  ON deliveries (provider, event_id);" },
-            { label: "Hash of normalised payload", description: "Catches re-issues too, but two genuine identical refunds on the same day would be merged into one. Silent data loss risk.", preview: "CREATE UNIQUE INDEX CONCURRENTLY deliveries_payload_uq\n  ON deliveries (provider, payload_sha256);" },
+            { label: "Both: event ID, then flag lookalikes", description: "Unique on (provider, event_id); a payload-hash match on a new ID is held for review instead of posted. Catches all 41 without silently merging genuine twins.", recommended: true, previewLang: "sql", preview: "-- unique, enforced\nCREATE UNIQUE INDEX CONCURRENTLY deliveries_event_uq\n  ON deliveries (provider, event_id);\n\n-- lookalike: held, not dropped\nIF hash_seen(payload_sha256, 72h) THEN\n  hold_for_review(delivery)\nEND IF;" },
+            { label: "Provider event ID only", description: "Exact and simple. Stripe and Adyen guarantee unique IDs; misses the 3 incident re-issues, which would still need manual reversal.", previewLang: "sql", preview: "CREATE UNIQUE INDEX CONCURRENTLY deliveries_event_uq\n  ON deliveries (provider, event_id);" },
+            { label: "Hash of normalised payload", description: "Catches re-issues too, but two genuine identical refunds on the same day would be merged into one. Silent data loss risk.", previewLang: "sql", preview: "CREATE UNIQUE INDEX CONCURRENTLY deliveries_payload_uq\n  ON deliveries (provider, payload_sha256);" },
           ],
         },
         assigned: [

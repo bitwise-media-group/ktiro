@@ -13,6 +13,7 @@
     "start": "bun server.ts"
   },
   "dependencies": {
+    "lowlight": "^3.3.0",
     "preact": "^11.0.0"
   },
   "devDependencies": {
