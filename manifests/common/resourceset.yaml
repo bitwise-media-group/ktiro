@@ -16,9 +16,13 @@
 # Why a resourcesTemplate rather than plain objects: the image tag comes from
 # the ktiro-image provider (input-provider.yaml), so a new edge build rolls
 # the server on the next reconcile with no change here. A provider that finds
-# no tag fails the render (inputs are strict), which leaves the running
-# objects as they were. Kyverno verifies the signature on whatever digest the
-# tag resolves to (policy.yaml), and every tag is immutable.
+# no matching tag exports no inputs, and this set then renders nothing while
+# still reporting Ready: on the first install, if the manifests artifact
+# publishes before the image does, the namespace stays empty until the
+# provider's next reconcile finds one (or a fluxcd.controlplane.io/requestedAt
+# annotation on ktiro-image asks for it sooner). Kyverno verifies the
+# signature on whatever digest the tag resolves to (policy.yaml), and every
+# tag is immutable.
 apiVersion: fluxcd.controlplane.io/v1
 kind: ResourceSet
 metadata:
