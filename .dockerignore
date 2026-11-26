@@ -1,0 +1,15 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+
+# Build context for the Dockerfile: only what builds the page and the server.
+# Nothing else - manifests, modules, the toolchain submodule, node_modules,
+# a local dist/ - reaches the image.
+*
+!package.json
+!bun.lock
+!bunfig.toml
+!tsconfig.json
+!build.ts
+!index.html
+!server.ts
+!src/
