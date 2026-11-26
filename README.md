@@ -16,6 +16,25 @@ make screenshots                                  # every view, both themes (out
 The stack matches patchy's status page: Preact, Bun and Tailwind 4, on the shared toolchain's `node` archetype. The
 palette is patchy's, re-tinted from verdigris toward azure (`src/styles/tokens.css`).
 
+## Deploying
+
+The code, its image and its manifests live together in this repo, on the same supply chain as the platform's other
+applications:
+
+- `server.ts` and the `Dockerfile`: the page plus a tiny Bun server (gzip, ETag, CSP, `/_/healthz`, `/_/version`),
+  compiled to one binary on distroless for amd64 and arm64. `bun run start` serves the last build locally.
+- `patchy.yaml`: `patchy build` publishes `images/ktiro` and the `manifests/ktiro` Flux artifact. The release workflow
+  signs both on every push to `main` as an edge build (`<version>-edge.<timestamp>.g<commit>`), and promotes the newest
+  one to `vX.Y.Z` when release-please cuts a release.
+- `manifests/{common,google}`: the namespace, the server, its public HTTPRoute at `<KTIRO_HOST>.<PLATFORM_DOMAIN>`, the
+  image provider that follows the edge channel, and the Kyverno policy that verifies this repo's own signature.
+- `modules/google`: installs it onto a [terraform-google-gke-flux] cluster through that repo's `modules/application`.
+  The patchy cluster calls it from `cloud-accounts/environments/google/patchy-app`.
+
+It is deliberately public, with no sign-in: the prototype runs on demo data only.
+
+[terraform-google-gke-flux]: https://github.com/bitwise-media-group/terraform-google-gke-flux
+
 ## The model
 
 - **One artifact: the intent.** A feature, a bug, a security fix and a data-integrity repair are all intents; size never
