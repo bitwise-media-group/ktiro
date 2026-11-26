@@ -1,0 +1,28 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+
+# Lists the ktiro image's tags in the platform registry. The image is this
+# repo's own (Dockerfile), which `patchy build` publishes beside the manifests
+# artifact with the same edge/stable tags. It follows the edge channel: every
+# <version>-edge.<yyyymmddhhmmss>.g<commit> build below 1.0.0, so each push to
+# main rolls the server on the next reconcile (the seed follows the same
+# channel for the manifests). includeTag keeps the range to edge builds;
+# sha-<commit> tags are no version and stable vX.Y.Z tags never match it.
+#
+# Constraint order matters: kustomize drops the quotes, so the range must not
+# start with '>' or YAML reads it as a folded block scalar. The regexp ends
+# without '$' so post-build substitution never sees a stray dollar.
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSetInputProvider
+metadata:
+  name: ktiro-image
+  namespace: ktiro
+  annotations:
+    fluxcd.controlplane.io/reconcileEvery: 10m
+spec:
+  type: "${ARTIFACT_TAG_PROVIDER:=GARArtifactTag}"
+  url: oci://${PLATFORM_REGISTRY}/images/ktiro
+  filter:
+    semver: "<1.0.0-0 >=0.0.0-0"
+    includeTag: "^[0-9]+[.][0-9]+[.][0-9]+-edge[.][0-9]{14}[.]g[0-9a-f]{7,40}"
+    limit: 1

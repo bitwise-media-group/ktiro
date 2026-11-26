@@ -1,0 +1,15 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+#
+# The cloud-neutral core of ktiro: the namespace, the image's tag provider
+# (input-provider), the server itself (resourceset: Deployment, Service, PDB
+# and the public HTTPRoute) and the image policy for this repo's own
+# signature (policy). The per-cloud tree (../google) adds only what its
+# gateway needs: a health check.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - input-provider.yaml
+  - resourceset.yaml
+  - policy.yaml

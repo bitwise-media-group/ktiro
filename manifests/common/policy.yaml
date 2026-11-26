@@ -1,0 +1,139 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+
+# Image verification for the ktiro namespace. The platform's
+# verify-platform-signature policy verifies every pod image against the
+# platform publish identity (the flux-containers mirror); the ktiro server
+# image is built and signed by THIS repo's release workflow - a different
+# identity - so the platform rule can never pass it. Following the platform's
+# "own image signer" contract, two objects restore closure:
+#
+#   - a PolicyException (in the kyverno namespace, the only one kyverno
+#     reads exceptions from) that exempts the ktiro namespace from the
+#     platform policy, and
+#   - the verify-ktiro-signature ImageValidatingPolicy below, scoped to the
+#     same namespace, verifying the ktiro image against this repo's identity
+#     and every other image against the platform identity - so every image
+#     in the namespace is still verified by exactly one policy, and the
+#     exception can never widen into "unverified".
+#
+# An image policy honours only whole-resource exceptions, so the exemption is
+# by namespace; scoping on request.namespace also covers the Deployment,
+# and ReplicaSet kyverno checks beside the pods.
+apiVersion: policies.kyverno.io/v1
+kind: PolicyException
+metadata:
+  name: ktiro-images
+  namespace: kyverno
+spec:
+  policyRefs:
+    - kind: ImageValidatingPolicy
+      name: verify-platform-signature
+  matchConditions:
+    - name: ktiro-namespace
+      expression: >-
+        request.namespace == 'ktiro'
+---
+# The policy rides a ResourceSet because the attestor SHAPE follows the
+# signing mode and needs a text template: keyless clusters trust Fulcio
+# identities - KTIRO_IMAGE_SUBJECT (this repo's release.yaml on main, from
+# modules/google signed_identity_subject) for the ktiro image, the
+# platform's SIGNED_IDENTITY_IMAGES for the rest - while KMS-keyed clusters
+# (SIGNED_IDENTITY_KMS_KEY set) verify both against the signing key, which
+# patchy-publish signs this repo's builds with too. KYVERNO_FAILURE_ACTION
+# maps Enforce onto Deny, exactly as on the platform policy.
+#
+# Signatures are cosign v3 sigstore bundles attached via the OCI referrers
+# API. Registry auth is per-policy for this kind, so the cloud's provider is
+# named for the platform registry. Digest rewriting and verifyDigest stay off,
+# as on the platform policy.
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSet
+metadata:
+  name: ktiro-policy
+  namespace: ktiro
+spec:
+  resourcesTemplate: |
+    # compared inline, not via spec.inputs: post-build substitution turns
+    # an empty input into null, the key vanishes on apply, and the
+    # template's missingkey=error fails the build
+    << $keyed := ne "${SIGNED_IDENTITY_KMS_KEY:=}" "" >>
+    << $aws := eq "${OCI_PROVIDER:=gcp}" "aws" >>
+    << $enforce := eq "${KYVERNO_FAILURE_ACTION:=Audit}" "Enforce" >>
+    ---
+    apiVersion: policies.kyverno.io/v1
+    kind: ImageValidatingPolicy
+    metadata:
+      name: verify-ktiro-signature
+    spec:
+      validationActions:
+        - << if $enforce >>Deny<< else >>Audit<< end >>
+      failurePolicy: Fail
+      webhookConfiguration:
+        timeoutSeconds: 30
+      matchConstraints:
+        resourceRules:
+          - apiGroups: [""]
+            apiVersions: ["v1"]
+            operations: ["CREATE", "UPDATE"]
+            resources: ["pods"]
+      matchConditions:
+        - name: ktiro-namespace
+          expression: >-
+            request.namespace == 'ktiro'
+      # Every image: `images` carries only the matched ones, and the
+      # platform-identity rule below must see sidecars and init images too.
+      matchImageReferences:
+        - glob: "*"
+      credentials:
+        providers:
+          - << if $aws >>amazon<< else >>google<< end >>
+      attestors:
+        - name: ktiro
+          cosign:
+            << if $keyed >>
+            key:
+              kms: << if $aws >>awskms:///${SIGNED_IDENTITY_KMS_KEY:=}<< else >>gcpkms://${SIGNED_IDENTITY_KMS_KEY:=}<< end >>
+            << else >>
+            # Single-quoted: the values are regexes whose backslashes a
+            # double-quoted scalar would mangle.
+            keyless:
+              identities:
+                - subjectRegExp: '${KTIRO_IMAGE_SUBJECT}'
+                  issuerRegExp: '${SIGNED_IDENTITY_ISSUER}'
+            << end >>
+        - name: platform
+          cosign:
+            << if $keyed >>
+            key:
+              kms: << if $aws >>awskms:///${SIGNED_IDENTITY_KMS_KEY:=}<< else >>gcpkms://${SIGNED_IDENTITY_KMS_KEY:=}<< end >>
+            << else >>
+            keyless:
+              identities:
+                - subjectRegExp: '${SIGNED_IDENTITY_IMAGES}'
+                  issuerRegExp: '${SIGNED_IDENTITY_ISSUER}'
+            << end >>
+      validationConfigurations:
+        required: true
+        mutateDigest: false
+        verifyDigest: false
+      variables:
+        - name: allImages
+          expression: >-
+            images.?containers.orValue([]) + images.?initContainers.orValue([]) + images.?ephemeralContainers.orValue([])
+        - name: ktiroImages
+          expression: >-
+            variables.allImages.filter(image, image.startsWith('${PLATFORM_REGISTRY}/images/ktiro:') || image.startsWith('${PLATFORM_REGISTRY}/images/ktiro@'))
+      validations:
+        - expression: >-
+            variables.ktiroImages.all(image, verifyImageSignatures(image, [attestors.ktiro]) > 0)
+          message: the ktiro image must carry this repository's release workflow signature
+        # Everything else in the namespace (a debug container, a future
+        # sidecar) is held to the platform identity, exactly as the exempted
+        # platform policy would have - the exception moves the check, it
+        # does not remove it.
+        - expression: >-
+            variables.allImages
+            .filter(image, !(image in variables.ktiroImages))
+            .all(image, verifyImageSignatures(image, [attestors.platform]) > 0)
+          message: every other image must carry the platform publish workflow's signature

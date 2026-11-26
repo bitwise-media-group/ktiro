@@ -1,0 +1,19 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+
+# Pre-created by terraform (modules/google, through the cluster module's
+# modules/application); this image adopts it via server-side apply to stamp
+# its labels.
+#
+# restricted on all three Pod Security modes: the server runs as non-root with
+# no capabilities on a read-only root filesystem. gateway-access admits the
+# namespace's HTTPRoute to the platform gateway's wildcard listener.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ktiro
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+    platform.bitwisemedia.uk/gateway-access: "true"

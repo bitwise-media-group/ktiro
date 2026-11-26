@@ -1,0 +1,152 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+
+# The ktiro server and everything it needs in-cluster:
+#
+#   - ServiceAccount ktiro: no cloud identity, no token - the server reads
+#     nothing but its own image.
+#   - Deployment, Service and PodDisruptionBudget ktiro: two replicas of the
+#     stateless server (the page is baked into the image; all demo state lives
+#     in the visitor's browser).
+#   - HTTPRoute ktiro: ${KTIRO_HOST}.${PLATFORM_DOMAIN} on the platform
+#     gateway's wildcard listener and certificate; external-dns publishes it.
+#     Public: there is deliberately no DexClient - the prototype carries demo
+#     data only, so it can be shown from anywhere without a sign-in.
+#
+# Why a resourcesTemplate rather than plain objects: the image tag comes from
+# the ktiro-image provider (input-provider.yaml), so a new edge build rolls
+# the server on the next reconcile with no change here. A provider that finds
+# no tag fails the render (inputs are strict), which leaves the running
+# objects as they were. Kyverno verifies the signature on whatever digest the
+# tag resolves to (policy.yaml), and every tag is immutable.
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSet
+metadata:
+  name: ktiro
+  namespace: ktiro
+spec:
+  inputsFrom:
+    - kind: ResourceSetInputProvider
+      name: ktiro-image
+  resourcesTemplate: |
+    ---
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: ktiro
+      namespace: ktiro
+    automountServiceAccountToken: false
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ktiro
+      namespace: ktiro
+      labels:
+        app.kubernetes.io/name: ktiro
+        app.kubernetes.io/component: server
+    spec:
+      replicas: 2
+      revisionHistoryLimit: 3
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: ktiro
+          app.kubernetes.io/component: server
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: ktiro
+            app.kubernetes.io/component: server
+        spec:
+          serviceAccountName: ktiro
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: ktiro
+                  app.kubernetes.io/component: server
+          containers:
+            - name: ktiro
+              image: ${PLATFORM_REGISTRY}/images/ktiro:<< inputs.tag >>
+              env:
+                - name: PORT
+                  value: "8080"
+              ports:
+                - name: http
+                  containerPort: 8080
+                  protocol: TCP
+              readinessProbe:
+                httpGet:
+                  path: /_/healthz
+                  port: http
+                periodSeconds: 10
+              livenessProbe:
+                httpGet:
+                  path: /_/healthz
+                  port: http
+                periodSeconds: 20
+              resources:
+                requests:
+                  cpu: 20m
+                  memory: 48Mi
+                limits:
+                  memory: 160Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: ktiro
+      namespace: ktiro
+      labels:
+        app.kubernetes.io/name: ktiro
+    spec:
+      selector:
+        app.kubernetes.io/name: ktiro
+        app.kubernetes.io/component: server
+      ports:
+        - name: http
+          port: 8080
+          targetPort: http
+          protocol: TCP
+    ---
+    apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: ktiro
+      namespace: ktiro
+    spec:
+      minAvailable: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: ktiro
+          app.kubernetes.io/component: server
+    ---
+    apiVersion: gateway.networking.k8s.io/v1
+    kind: HTTPRoute
+    metadata:
+      name: ktiro
+      namespace: ktiro
+    spec:
+      parentRefs:
+        - name: platform
+          namespace: gateway
+      hostnames:
+        - ${KTIRO_HOST}.${PLATFORM_DOMAIN}
+      rules:
+        - backendRefs:
+            - name: ktiro
+              port: 8080

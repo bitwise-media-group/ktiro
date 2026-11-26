@@ -1,0 +1,27 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+
+# The GKE Gateway's managed load balancer health-checks backend pods with a
+# default GET / unless told otherwise. / would answer 200 here, but it is the
+# whole page; point the probe at the cheap liveness endpoint instead, the one
+# the kubelet's probes use.
+#
+# HealthCheckPolicy is the GKE Gateway dialect, which is why it lives in the
+# google tree.
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: ktiro
+  namespace: ktiro
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        portSpecification: USE_FIXED_PORT
+        port: 8080
+        requestPath: /_/healthz
+  targetRef:
+    group: ""
+    kind: Service
+    name: ktiro

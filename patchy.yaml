@@ -1,0 +1,51 @@
+# Copyright 2026 BitWise Media Group Ltd
+# SPDX-License-Identifier: MIT
+
+# patchy's configuration for this repo: `patchy build` builds the ktiro image
+# (Dockerfile) and packages manifests/ as the ktiro application's Flux OCI
+# artifact. Only the scan and build blocks live here. The registries and the
+# signing config are never committed: the release workflow's patchy-publish
+# step (bitwise-media-group/github-workflows) writes them from org variables
+# as a lower config layer, and `patchy build --all --dry-run` needs neither.
+
+scan:
+  # Off by default: the manifests artifact is unrendered kustomize. The image
+  # turns it back on for itself.
+  enabled: false
+  scanners:
+    osv: { enabled: true }
+
+build:
+  # Every tag is immutable:
+  #   edge    <next version>-edge.<UTC yyyymmddhhmmss>.g<short commit>, every
+  #           push to main that cuts no release (the next version is the open
+  #           release pull request's)
+  #   stable  vX.Y.Z, added to the newest X.Y.Z edge build when the release is
+  #           cut (patchy build promote), never rebuilt
+  # The seed (modules/google image.channel = "edge") and the image provider in
+  # manifests/common/input-provider.yaml both follow edge, so every push to
+  # main reaches the demo cluster.
+  tags:
+    - "${VERSION}-edge.${PATCHY_TIMESTAMP}.g${GIT_COMMIT:0:7}"
+    - "sha-${GIT_COMMIT}"
+  # Entry names are unique across images and manifests (they key the CLI
+  # selection and security/allowlists/<name>.yaml), hence ktiro-server.
+  images:
+    - name: ktiro-server
+      repository: images/ktiro
+      dockerfile: Dockerfile
+      context: .
+      architectures: [amd64, arm64]
+      args:
+        VERSION: "${VERSION}-edge.${PATCHY_TIMESTAMP}.g${GIT_COMMIT:0:7}"
+        COMMIT: "${GIT_COMMIT}"
+      scan:
+        enabled: true
+        failOn: [CRITICAL, HIGH]
+        ignoreUnfixed: true
+  manifests:
+    - name: ktiro
+      repository: manifests/ktiro
+      path: manifests
+      source: https://github.com/bitwise-media-group/ktiro
+      revision: "main@sha1:${GIT_COMMIT}"
