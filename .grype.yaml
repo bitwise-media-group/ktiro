@@ -10,7 +10,8 @@ ignore:
   # oven/bun:1.4.5-slim, the BUILD stage only (FROM --platform=$BUILDPLATFORM
   # ... AS build). Nothing from it ships: the runtime image copies only the
   # compiled server, which links the distroless runtime's own glibc, and the
-  # built HTML page. gcr.io/distroless/cc-debian13 (the runtime) scans clean.
+  # built HTML page. gcr.io/distroless/base-nossl-debian13 (the runtime) carries
+  # no fixable findings.
   # Fixed in Debian (2.41-12+deb13u5, zlib 1:1.3.dfsg+really1.3.1-1+deb13u1);
   # delete these once oven/bun publishes a rebuild carrying them.
   - vulnerability: CVE-2026-19499

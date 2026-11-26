@@ -8,7 +8,9 @@
 # arm64 image never builds under emulation. VERSION and COMMIT arrive as build
 # args from patchy.yaml and surface at /_/version.
 #
-# distroless cc is the whole runtime: a compiled bun binary needs only glibc.
+# distroless base-nossl is the whole runtime: the compiled bun binary links
+# glibc alone (libc, libpthread, libdl, libm), so cc's libgcc and libstdc++
+# would only add scanner surface.
 # Runs as uid 65532 ("nonroot") under readOnlyRootFilesystem - the page is
 # read and compressed into memory at start-up.
 
@@ -32,7 +34,7 @@ RUN case "$TARGETARCH" in \
     esac \
     && bun build server.ts --compile --minify --target="$target" --outfile /out/ktiro
 
-FROM gcr.io/distroless/cc-debian13:nonroot@sha256:29ee70762214fe8190cea04ef1c0a84a8365879e047ce8f911ae5a5ab2355fa2
+FROM gcr.io/distroless/base-nossl-debian13:nonroot@sha256:4006ac92504be607b70de01d1f64f38288c69fcd8faa820f6d3aed266ea32ac5
 
 ARG VERSION=dev
 ARG COMMIT=unknown
