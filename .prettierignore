@@ -1,0 +1,8 @@
+# Shared toolchain submodule (linted in its own repo)
+.mise/
+
+dist/
+node_modules/
+screenshots/
+bun.lock
+.claude/

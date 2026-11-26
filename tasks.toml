@@ -1,0 +1,14 @@
+# Copyright 2026 Bitwise Media Group Ltd.
+# SPDX-License-Identifier: MIT
+#
+# Repo-local tasks, on top of the node archetype's lint / build / test / ci / pr.
+
+[dev]
+description = "run the prototype on http://localhost:5173 with hot reload (serve is the docs site)"
+depends = ["node-install"]
+run = "bun run dev"
+
+[screenshots]
+description = "capture every view in both themes into screenshots/ (outside the Claude Code sandbox)"
+depends = ["node-install"]
+run = "bun run screenshots"

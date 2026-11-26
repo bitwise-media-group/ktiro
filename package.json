@@ -1,0 +1,22 @@
+{
+  "name": "ktiro-prototype",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "bun@1.4.5",
+  "description": "ktiro: a demo-data prototype of an end-to-end, intent-driven software factory.",
+  "scripts": {
+    "dev": "bun dev.ts",
+    "build": "bun check --no-script && bun build.ts",
+    "typecheck": "bun check --no-script",
+    "screenshots": "bun screenshot.ts"
+  },
+  "dependencies": {
+    "preact": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "bun-plugin-tailwind": "^0.1.2",
+    "tailwindcss": "^4.1.0"
+  }
+}

@@ -1,0 +1,21 @@
+# Copyright 2026 Bitwise Media Group Ltd.
+# SPDX-License-Identifier: MIT
+#
+# ktiro consumes the shared toolchain (bitwise-media-group/toolchain) as the
+# .mise/ submodule, on the node archetype: bun is the shared pin (runtime,
+# package manager, bundler and type checker), the common tasks come from
+# common/, and the Makefile is a thin forwarder. Repo-local tasks live in
+# tasks.toml.
+
+[settings]
+lockfile = true
+locked = true
+minimum_release_age = "7d"
+
+[task_config]
+# common first, then exactly one archetype, then the repo-local tasks.toml.
+includes = [
+  ".mise/common/tasks.toml",
+  ".mise/archetypes/node/tasks.toml",
+  "tasks.toml",
+]

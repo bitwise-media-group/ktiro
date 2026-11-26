@@ -1,0 +1,6 @@
+.git/**
+.mise/**
+node_modules/**
+dist/**
+screenshots/**
+commit.sh

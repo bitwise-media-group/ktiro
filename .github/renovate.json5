@@ -1,0 +1,8 @@
+// Copyright 2026 Bitwise Media Group Ltd.
+// SPDX-License-Identifier: MIT
+
+// Repo overrides on top of the org preset (the bot's global config already applies
+// github>bitwise-media-group/renovate-config:default.json5 to every repository).
+{
+    $schema: "https://docs.renovatebot.com/renovate-schema.json",
+}

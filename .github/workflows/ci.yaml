@@ -1,0 +1,25 @@
+# Copyright 2026 Bitwise Media Group Ltd.
+# SPDX-License-Identifier: MIT
+
+# Continuous integration: a thin caller for the org's reusable ci workflow (v5+
+# is mise-task aware). It discovers the canonical tasks this repo defines and runs
+# `mise run lint` / `build` / `test` as one parallel job each. The node archetype
+# of the toolchain submodule at .mise/ maps those onto package.json scripts, on
+# the shared bun pin.
+#
+# The reusable workflow is pinned to a full commit SHA (tag in the comment) so a
+# moved tag can never change what runs; Renovate keeps the pin fresh.
+name: Continuous Integration
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+# the reusable workflow's jobs only need contents:read; grant only that ceiling
+permissions:
+    contents: read
+
+jobs:
+    ci:
+        uses: bitwise-media-group/github-workflows/.github/workflows/ci.yaml@1fffd7094bbe0c7bb0c2c6019b14494db0cbf915 # v8.4.0

@@ -1,0 +1,10 @@
+# build artifacts
+dist/
+node_modules/
+
+# screenshot output (mise run screenshots)
+screenshots/
+
+# claude code
+/.claude/**
+!/.claude/settings.json
