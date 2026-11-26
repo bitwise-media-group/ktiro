@@ -1,0 +1,449 @@
+/**
+ * Copyright 2026 BitWise Media Group Ltd
+ * SPDX-License-Identifier: MIT
+ */
+
+/* ktiro prototype: Tailwind entry.
+ *
+ * Layout, spacing and type live as utilities in the components. This file
+ * carries (1) the Tailwind theme mapped onto the --k-* tokens, so utilities
+ * like bg-surface / text-muted re-tint through the body-class theme switch,
+ * and (2) the handful of recipes utilities can't express cleanly (tone pills
+ * via color-mix, the phase rail, the thread, tables). Every colour resolves
+ * from tokens.css. */
+
+@import "tailwindcss";
+@import "./tokens.css";
+
+@theme {
+  --animate-pulse-dot: k-pulse 1.7s ease-in-out infinite;
+  @keyframes k-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.8);
+    }
+  }
+  --animate-rise: k-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes k-rise {
+    from {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  --animate-shimmer: k-shimmer 1.6s linear infinite;
+  @keyframes k-shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+}
+
+@theme inline {
+  --color-accent: var(--k-accent);
+  --color-accent-2: var(--k-accent-2);
+  --color-accent-deep: var(--k-accent-deep);
+  --color-ink: var(--k-ink);
+  --color-onaccent: var(--k-on-accent);
+  --color-done: var(--k-done);
+  --color-amber: var(--k-amber);
+  --color-red: var(--k-red);
+  --color-stone: var(--k-stone);
+  --color-sec: var(--k-kind-security);
+  --color-data: var(--k-kind-data);
+  --color-feat: var(--k-kind-feature);
+  --color-bug: var(--k-kind-bug);
+  --color-page: var(--k-bg);
+  --color-surface: var(--k-surface);
+  --color-surface-2: var(--k-surface-2);
+  --color-code: var(--k-code);
+  --color-code-2: var(--k-code-2);
+  --color-line: var(--k-line);
+  --color-line-2: var(--k-line-2);
+  --color-line-3: var(--k-line-3);
+  --color-fg: var(--k-fg);
+  --color-muted: var(--k-muted);
+  --color-faint: var(--k-faint);
+  --shadow-card: var(--k-shadow);
+  --shadow-strong: var(--k-shadow-strong);
+  --shadow-glow: var(--k-glow);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-page text-fg font-sans text-[14px] leading-normal;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  a {
+    color: inherit;
+  }
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--k-accent);
+    color: var(--k-on-accent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .k-skip {
+    @apply absolute top-2 left-2 z-50 -translate-y-20 rounded-md bg-accent px-3 py-2 text-[13px] font-semibold text-onaccent no-underline;
+  }
+  .k-skip:focus {
+    @apply translate-y-0;
+  }
+
+  /* ---- surfaces ---- */
+  .k-card {
+    @apply rounded-[10px] border border-line bg-surface;
+  }
+  .k-card--pad {
+    @apply p-4;
+  }
+  .k-card--hover {
+    @apply transition-colors hover:border-line-2;
+  }
+
+  /* ---- inputs: control edges at 3:1 ---- */
+  .k-input {
+    @apply min-h-9 w-full rounded-lg border border-line-3 bg-surface px-3 text-[14px] text-fg placeholder:text-faint;
+  }
+  textarea.k-input {
+    @apply py-2 leading-relaxed;
+  }
+
+  /* ---- pills: tone grammar via color-mix tints ---- */
+  .k-pill {
+    --tone: var(--k-accent);
+    @apply inline-flex w-fit items-center gap-1.5 rounded-full px-2 py-[2px] font-mono text-[12px] font-medium whitespace-nowrap;
+    color: var(--tone);
+    background: color-mix(in oklab, var(--tone) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--tone) 28%, transparent);
+  }
+  .k-pill--accent {
+    --tone: var(--k-ink);
+  }
+  .k-pill--done {
+    --tone: var(--k-done);
+  }
+  .k-pill--amber {
+    --tone: var(--k-amber);
+  }
+  .k-pill--red {
+    --tone: var(--k-red);
+  }
+  .k-pill--stone {
+    --tone: var(--k-stone);
+  }
+  .k-pill--sec {
+    --tone: var(--k-kind-security);
+  }
+  .k-pill--data {
+    --tone: var(--k-kind-data);
+  }
+  .k-pill--feat {
+    --tone: var(--k-kind-feature);
+  }
+  .k-pill--bug {
+    --tone: var(--k-kind-bug);
+  }
+  .k-pill--neutral {
+    color: var(--k-muted);
+    background: color-mix(in oklab, var(--k-muted) 8%, transparent);
+    border-color: var(--k-line-2);
+  }
+  .k-pill__label {
+    @apply font-medium text-muted;
+  }
+
+  .k-live-dot {
+    @apply animate-pulse-dot inline-block size-[7px] flex-none rounded-full bg-accent;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--k-accent) 12%, transparent);
+  }
+  .k-live-dot--amber {
+    @apply bg-amber;
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--k-amber) 14%, transparent);
+  }
+
+  .k-mono-tag {
+    @apply inline-flex items-center gap-1 rounded-md border border-line bg-code-2 px-1.5 py-0.5 font-mono text-[12px] text-fg no-underline;
+    overflow-wrap: anywhere;
+  }
+  a.k-mono-tag:hover {
+    @apply border-line-2;
+  }
+  .k-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line-2 bg-surface px-2 py-1 font-mono text-[12px] text-muted no-underline;
+  }
+
+  /* ---- notes (amber default; accent / done / red variants) ---- */
+  .k-note {
+    --tone: var(--k-amber);
+    @apply flex items-start gap-2.5 rounded-[10px] px-3.5 py-2.5 text-[13.5px] leading-relaxed;
+    color: var(--tone);
+    background: color-mix(in oklab, var(--tone) 8%, transparent);
+    border: 1px solid color-mix(in oklab, var(--tone) 26%, transparent);
+  }
+  .k-note--accent {
+    --tone: var(--k-ink);
+  }
+  .k-note--done {
+    --tone: var(--k-done);
+  }
+  .k-note--red {
+    --tone: var(--k-red);
+  }
+
+  .k-heading {
+    @apply m-0 font-sans text-[15px] leading-snug font-bold text-fg;
+  }
+  .k-eyebrow {
+    @apply font-mono text-[11.5px] font-medium tracking-[0.06em] text-faint uppercase;
+  }
+  .k-label {
+    @apply font-sans text-[12.5px] text-muted;
+  }
+
+  .k-kv {
+    @apply m-0 grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-x-4 gap-y-3;
+  }
+  .k-kv--stack {
+    @apply grid-cols-1 gap-2.5;
+  }
+  .k-kv dt {
+    @apply font-sans text-[12.5px] text-muted;
+  }
+  .k-kv dd {
+    @apply mx-0 mt-0.5 mb-0 text-[14px] text-fg;
+  }
+
+  /* ---- segmented groups ---- */
+  .k-seg {
+    @apply flex w-fit rounded-lg border border-line-3 bg-surface p-[3px];
+  }
+  .k-seg button {
+    @apply inline-flex cursor-pointer items-center gap-1.5 rounded-md border-0 bg-transparent px-2.5 py-1 font-sans text-[13px] text-muted hover:text-fg;
+  }
+  .k-seg button.is-active {
+    @apply bg-surface-2 text-fg;
+    box-shadow: inset 0 0 0 1px var(--k-line-2);
+  }
+
+  /* ---- tabs ---- */
+  .k-tabs {
+    @apply flex gap-5 overflow-x-auto border-b border-line;
+  }
+  .k-tabs a {
+    @apply -mb-px inline-flex items-center gap-1.5 border-b-2 border-transparent px-0.5 py-3 text-[14px] font-semibold whitespace-nowrap text-muted no-underline hover:text-fg;
+  }
+  .k-tabs a.is-active {
+    @apply border-accent text-ink;
+  }
+  .k-count {
+    @apply inline-grid min-w-[18px] place-items-center rounded-full bg-surface-2 px-1 font-mono text-[11px] text-muted;
+  }
+  .k-count--amber {
+    @apply text-onaccent;
+    background: var(--k-amber);
+  }
+
+  /* ---- stat tile ---- */
+  .k-stat {
+    @apply min-h-[84px] border-l border-line px-5 py-4 first:border-l-0;
+  }
+  .k-stat strong {
+    @apply block font-mono text-[22px] leading-tight font-bold text-fg;
+  }
+  .k-stat span {
+    @apply mt-1 block text-[12.5px] text-muted;
+  }
+
+  /* ---- tracks & bars ---- */
+  .k-track {
+    @apply block h-[4px] overflow-hidden rounded-full bg-line;
+  }
+  .k-track > span {
+    @apply block h-full rounded-full bg-accent transition-[width] duration-500;
+  }
+  .k-strip {
+    @apply flex h-2 gap-[2px] overflow-hidden rounded-full;
+  }
+  .k-strip > span {
+    @apply block h-full min-w-[3px];
+  }
+  .k-swatch {
+    @apply inline-block size-2.5 flex-none rounded-[3px];
+  }
+
+  /* ---- buttons ---- */
+  .k-btn {
+    @apply inline-flex min-h-9 cursor-pointer items-center justify-center gap-2 rounded-lg border border-line-3 bg-surface px-3.5 text-[13.5px] font-semibold whitespace-nowrap text-fg no-underline transition-colors disabled:cursor-default disabled:opacity-55;
+  }
+  .k-btn:hover:not(:disabled) {
+    @apply border-accent;
+  }
+  .k-btn--primary {
+    @apply border-accent bg-accent text-onaccent shadow-glow;
+  }
+  .k-btn--primary:hover:not(:disabled) {
+    @apply border-accent-2 bg-accent-2;
+  }
+  .k-btn--ghost {
+    @apply border-transparent bg-transparent text-muted;
+  }
+  .k-btn--ghost:hover:not(:disabled) {
+    @apply border-line-2 text-fg;
+  }
+  .k-btn--sm {
+    @apply min-h-7 gap-1.5 rounded-md px-2.5 text-[12.5px];
+  }
+
+  /* ---- tables ---- */
+  .k-table {
+    @apply w-full border-collapse text-left text-[13.5px];
+  }
+  .k-table thead th {
+    @apply h-10 border-b border-line bg-surface-2 px-4 text-[12.5px] font-semibold whitespace-nowrap text-muted;
+  }
+  .k-table tbody :is(th, td) {
+    @apply h-12 border-b border-line px-4 align-middle;
+  }
+  .k-table tbody tr:last-child :is(th, td) {
+    @apply border-b-0;
+  }
+  .k-table tbody tr.is-link {
+    @apply cursor-pointer;
+  }
+  .k-table tbody tr:hover :is(th, td) {
+    background: color-mix(in oklab, var(--k-accent) 4%, var(--k-surface));
+  }
+  .k-table .num {
+    @apply text-right font-mono whitespace-nowrap;
+  }
+
+  /* ---- timeline rail (vertical) ---- */
+  .k-tl__item {
+    @apply relative flex min-h-[48px] items-start gap-3 pb-3;
+  }
+  .k-tl__item:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 26px;
+    bottom: 2px;
+    width: 1px;
+    background: var(--k-line-2);
+  }
+  .k-tl__marker {
+    @apply relative z-[1] grid size-[23px] flex-none place-items-center rounded-full border border-line-2 bg-surface-2 text-muted;
+  }
+
+  /* ---- markdown body ---- */
+  .k-md {
+    @apply text-[14px] leading-relaxed text-fg;
+  }
+  .k-md > * + * {
+    @apply mt-2.5;
+  }
+  .k-md h1 {
+    @apply text-[18px] font-bold;
+  }
+  .k-md h2 {
+    @apply mt-5 text-[15px] font-bold;
+  }
+  .k-md h3 {
+    @apply mt-4 text-[14px] font-bold;
+  }
+  .k-md ul {
+    @apply list-disc pl-5;
+  }
+  .k-md ol {
+    @apply list-decimal pl-5;
+  }
+  .k-md li + li {
+    @apply mt-1;
+  }
+  .k-md code {
+    @apply rounded border border-line bg-code-2 px-1 py-px font-mono text-[12.5px];
+  }
+  .k-md pre {
+    @apply overflow-x-auto rounded-lg border border-line bg-code p-3 font-mono text-[12.5px] leading-relaxed;
+  }
+  .k-md pre code {
+    @apply border-0 bg-transparent p-0;
+  }
+  .k-md strong {
+    @apply font-bold;
+  }
+  .k-md a {
+    @apply text-ink underline decoration-1 underline-offset-2;
+  }
+  .k-md blockquote {
+    @apply border-l-2 border-line-2 pl-3 text-muted;
+  }
+
+  /* ---- option (question) rows ---- */
+  .k-option {
+    @apply flex w-full cursor-pointer items-start gap-3 rounded-lg border border-line bg-surface px-3.5 py-3 text-left transition-colors hover:border-line-3;
+  }
+  .k-option.is-selected {
+    @apply border-accent;
+    background: color-mix(in oklab, var(--k-accent) 7%, var(--k-surface));
+  }
+  .k-option__radio {
+    @apply mt-0.5 grid size-[18px] flex-none place-items-center rounded-full border border-line-3;
+  }
+  .k-option.is-selected .k-option__radio {
+    @apply border-accent bg-accent text-onaccent;
+  }
+
+  .k-skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--k-surface-2) 0%,
+      color-mix(in oklab, var(--k-line-2) 60%, var(--k-surface-2)) 50%,
+      var(--k-surface-2) 100%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded;
+  }
+
+  .k-scroll-fade {
+    mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent);
+  }
+}

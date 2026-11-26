@@ -1,0 +1,110 @@
+/**
+ * Copyright 2026 BitWise Media Group Ltd
+ * SPDX-License-Identifier: MIT
+ */
+
+/* ktiro design tokens.
+ *
+ * Derived from the patchy palette (verdigris on graphite and stone) and
+ * re-tinted toward blue: azure on blue-graphite, slate paper in light mode.
+ *
+ * Tone grammar, the same in both modes:
+ *   accent  azure      progress, selection, the one call to action
+ *   done    verdigris  completed, healthy, passing (patchy's accent, kept as
+ *                      a nod to where the palette came from)
+ *   amber              a human is needed (HIL), or something is waiting
+ *   red                failure, rollback, a blocking concern
+ *   kinds              security / data integrity / feature / bug: a ramp
+ *                      that never reuses a state tone, so criticality never
+ *                      reads as status
+ * Agents and people are told apart by shape (agents are rounded squares,
+ * people are circles), never by hue alone.
+ */
+
+:root {
+  --font-sans: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 999px;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 360ms;
+}
+
+.theme-ktiro,
+.theme-ktiro-light {
+  --focus-ring: var(--k-accent);
+}
+
+/* Dark: blue-graphite with a lifted azure. */
+.theme-ktiro {
+  color-scheme: dark;
+  --k-accent: #58a6f0;
+  --k-accent-2: #7dbaf4;
+  --k-accent-deep: #3a86d2;
+  --k-ink: #79b6f3;
+  --k-on-accent: #03172b;
+  --k-done: #4cc9a0;
+  --k-amber: #e9b452;
+  --k-red: #f27f75;
+  --k-stone: #b3a48c;
+
+  --k-kind-security: #ff6b8f;
+  --k-kind-data: #fb9440;
+  --k-kind-feature: #a3b3ff;
+  --k-kind-bug: #ecd05a;
+
+  --k-bg: #0e1318;
+  --k-surface: #141a21;
+  --k-surface-2: #1a222b;
+  --k-code: #0a0f14;
+  --k-code-2: #10171f;
+  --k-line: #232d37;
+  --k-line-2: #313d49;
+  --k-line-3: #64727f;
+  --k-fg: #e5ecf2;
+  --k-muted: #a1aebb;
+  --k-faint: #8693a1;
+  --k-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.22);
+  --k-shadow-strong: 0 2px 4px rgba(0, 0, 0, 0.3), 0 24px 60px rgba(0, 0, 0, 0.45);
+  --k-glow: 0 0 0 1px rgba(88, 166, 240, 0.35);
+}
+
+/* Light: slate paper, white panels, deep azure. */
+.theme-ktiro-light {
+  color-scheme: light;
+  --k-accent: #1d62b0;
+  --k-accent-2: #164f90;
+  --k-accent-deep: #134a87;
+  --k-ink: #1a5ba3;
+  --k-on-accent: #ffffff;
+  --k-done: #0d7a5a;
+  --k-amber: #925400;
+  --k-red: #b3261e;
+  --k-stone: #77603f;
+
+  --k-kind-security: #a3123a;
+  --k-kind-data: #a94700;
+  --k-kind-feature: #3d4fc4;
+  --k-kind-bug: #7d6000;
+
+  --k-bg: #f2f5f8;
+  --k-surface: #ffffff;
+  --k-surface-2: #ebf0f5;
+  --k-code: #e2e9f0;
+  --k-code-2: #eef2f6;
+  --k-line: #d7dfe7;
+  --k-line-2: #bfc9d3;
+  --k-line-3: #7a8794;
+  --k-fg: #111a23;
+  --k-muted: #44515e;
+  --k-faint: #556270;
+  --k-shadow: 0 1px 2px rgba(17, 26, 35, 0.06), 0 8px 24px rgba(17, 26, 35, 0.06);
+  --k-shadow-strong: 0 2px 4px rgba(17, 26, 35, 0.08), 0 24px 60px rgba(17, 26, 35, 0.14);
+  --k-glow: 0 0 0 1px rgba(29, 98, 176, 0.3);
+}
